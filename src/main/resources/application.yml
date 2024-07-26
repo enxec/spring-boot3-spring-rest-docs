@@ -1,3 +1,6 @@
 spring:
   application:
     name: restdocs
+  test:
+    restdocs:
+      output-dir: target/generated-snippets

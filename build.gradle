@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 group = 'enxec.example'
@@ -17,13 +18,49 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	snippetsDir = file('build/generated-snippets')
+}
+
+configurations {
+	asciidoctorExtensions
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Spring REST Docs
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor:2.0.6.RELEASE'
 }
 
-tasks.named('test') {
+test {
+	outputs.dir snippetsDir
 	useJUnitPlatform()
+}
+
+asciidoctor {
+	configurations 'asciidoctorExtensions'
+	sources {
+		include 'index.adoc'
+	}
+	outputDir = layout.buildDirectory.dir('docs/asciidoc')
+	dependsOn test
+	attributes 'snippets': snippetsDir
+
+	inputs.dir snippetsDir
+	sourceDir = file('src/docs/asciidoc')
+}
+
+task copyDocs(type: Copy) {
+	from 'build/docs/asciidoc'
+	into 'src/main/resources/static/docs'
+	dependsOn asciidoctor
+}
+
+build {
+	dependsOn copyDocs
 }

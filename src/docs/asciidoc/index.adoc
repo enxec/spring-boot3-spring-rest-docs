@@ -1,0 +1,8 @@
+= API Documentation
+:doctype: book
+:toc: left
+
+== Example API
+
+include::{snippets}/example/http-request.adoc[]
+include::{snippets}/example/http-response.adoc[]
